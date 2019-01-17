@@ -37,7 +37,7 @@ master:
    * Implement reading reftek encodings '16' and '32' (uncompressed data,
      16/32bit integers, see #2058 and #2059)
  - obspy.io.rg16:
-   * implement module to read waveforms and headers from fcnt format (see #2265). 
+   * implement module to read waveforms and headers from fcnt format (see #2265).
  - obspy.io.quakeml:
    * Allow writing invalid ids but raise a warning
      (see #2104, #2090, #2093, #1872).
@@ -46,9 +46,11 @@ master:
  - obspy.io.sac:
    * Fix bug writing inventory with SOH channels to SACPZ (see #2200).
  - obspy.io.seiscomp:
-   * Adding support for SC3ML 0.10 (see #2024).
+   * Add support for SC3ML 0.10 (see #2024).
    * Update xsl to allow conversion of amplitude picks not associated with
      origins (see #2273).
+   * Add support for SC3ML 0.11 (see #2284).
+   * Add support for custom tags (see #2284).
  - obspy.io.sh:
    * Add read support for SeismicHandler EVT event files (see #2109)
  - obspy.io.shapefile:
