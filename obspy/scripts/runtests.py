@@ -103,6 +103,7 @@ import warnings
 from argparse import ArgumentParser
 
 import numpy as np
+import pytest
 import requests
 
 import obspy
@@ -111,6 +112,7 @@ from obspy.core.util import ALL_MODULES, DEFAULT_MODULES, NETWORK_MODULES
 from obspy.core.util.misc import MatplotlibBackend
 from obspy.core.util.testing import MODULE_TEST_SKIP_CHECKS
 from obspy.core.util.version import get_git_version
+from obspy.testing.testrunner import run_tests
 
 
 HARD_DEPENDENCIES = [
@@ -501,218 +503,97 @@ class _TextTestRunner(unittest.TextTestRunner):
         elif self.verbosity:
             self.stream.writeln("OK")
         return results, time_taken, (faileds + erroreds)
+#
+#
+# def run_tests(verbosity=1, tests=None, report=False, log=None,
+#               server="tests.obspy.org", test_all_modules=False, timeit=False,
+#               interactive=False, slowest=0, exclude=[], tutorial=False,
+#               hostname=HOSTNAME, ci_url=None, pr_url=None):
+#     """
+#     This function executes ObsPy test suites.
+#
+#     :type verbosity: int, optional
+#     :param verbosity: Run tests in verbose mode (``0``=quiet, ``1``=normal,
+#         ``2``=verbose, default is ``1``).
+#     :type tests: list of str
+#     :param tests: List of submodules for which test suites should be run
+#         (e.g. ``['io.mseed', 'io.sac']``).  If no suites are specified, all
+#         non-networking submodules' test suites will be run.
+#     :type report: bool, optional
+#     :param report: Submits a test report if enabled (default is ``False``).
+#     :type log: str, optional
+#     :param log: Filename of install log file to append to report.
+#     :type server: str, optional
+#     :param server: Report server URL (default is ``"tests.obspy.org"``).
+#     """
+#     if tests is None:
+#         tests = []
+#     print("Running {}, ObsPy version '{}'".format(__file__, obspy.__version__))
+#     if test_all_modules:
+#         tests = copy.copy(ALL_MODULES)
+#     elif not tests:
+#         tests = copy.copy(DEFAULT_MODULES)
+#     # remove any excluded module
+#     if exclude:
+#         for name in exclude:
+#             try:
+#                 tests.remove(name)
+#             except ValueError:
+#                 pass
+#     # fetch tests suites
+#     suites, status, import_failures = _get_suites(verbosity, tests)
+#     # add testsuite for all of the tutorial's rst files
+#     if tutorial:
+#         try:
+#             # assume we are in the trunk
+#             tut_path = os.path.dirname(__file__)
+#             tut_path = os.path.join(tut_path, '..', '..', '..', '..', 'misc',
+#                                     'docs', 'source', 'tutorial', '*.rst')
+#             tut_suite = unittest.TestSuite()
+#             for file in glob.glob(tut_path):
+#                 filesuite = doctest.DocFileSuite(file, module_relative=False)
+#                 tut_suite.addTest(filesuite)
+#             suites['tutorial'] = tut_suite
+#         except Exception:
+#             msg = "Could not add tutorial files to tests."
+#             warnings.warn(msg)
+#     # run test suites
+#     ttr, total_time, errors = _TextTestRunner(verbosity=verbosity,
+#                                               timeit=timeit).run(suites)
+#     # sort tests by time taken
+#     mydict = {}
+#     # loop over modules
+#     for mod in ttr.values():
+#         mydict.update(dict(mod.timer))
+#     sorted_tests = sorted(iter(mydict.items()), key=operator.itemgetter(1))
+#     sorted_tests = sorted_tests[::-1]
+#
+#     if slowest:
+#         slowest_tests = ["%0.3fs: %s" % (dt, desc)
+#                          for (desc, dt) in sorted_tests[:slowest]]
+#         print()
+#         print("Slowest Tests")
+#         print("-------------")
+#         print(os.linesep.join(slowest_tests))
+#         print()
+#         print()
+#     if interactive and not report:
+#         msg = "Do you want to report this to %s? [n]: " % (server)
+#         var = input(msg).lower()
+#         if 'y' in var:
+#             report = True
+#     if report:
+#         _create_report(ttr, total_time, log, server, hostname, sorted_tests,
+#                        ci_url, pr_url, import_failures)
+#     # make obspy-runtests exit with 1 if a test suite could not be added,
+#     # indicating failure
+#     if status is False:
+#         errors += 1
+#     if errors:
+#         return errors
 
 
-def run_tests(verbosity=1, tests=None, report=False, log=None,
-              server="tests.obspy.org", test_all_modules=False, timeit=False,
-              interactive=False, slowest=0, exclude=[], tutorial=False,
-              hostname=HOSTNAME, ci_url=None, pr_url=None):
-    """
-    This function executes ObsPy test suites.
 
-    :type verbosity: int, optional
-    :param verbosity: Run tests in verbose mode (``0``=quiet, ``1``=normal,
-        ``2``=verbose, default is ``1``).
-    :type tests: list of str
-    :param tests: List of submodules for which test suites should be run
-        (e.g. ``['io.mseed', 'io.sac']``).  If no suites are specified, all
-        non-networking submodules' test suites will be run.
-    :type report: bool, optional
-    :param report: Submits a test report if enabled (default is ``False``).
-    :type log: str, optional
-    :param log: Filename of install log file to append to report.
-    :type server: str, optional
-    :param server: Report server URL (default is ``"tests.obspy.org"``).
-    """
-    if tests is None:
-        tests = []
-    print("Running {}, ObsPy version '{}'".format(__file__, obspy.__version__))
-    if test_all_modules:
-        tests = copy.copy(ALL_MODULES)
-    elif not tests:
-        tests = copy.copy(DEFAULT_MODULES)
-    # remove any excluded module
-    if exclude:
-        for name in exclude:
-            try:
-                tests.remove(name)
-            except ValueError:
-                pass
-    # fetch tests suites
-    suites, status, import_failures = _get_suites(verbosity, tests)
-    # add testsuite for all of the tutorial's rst files
-    if tutorial:
-        try:
-            # assume we are in the trunk
-            tut_path = os.path.dirname(__file__)
-            tut_path = os.path.join(tut_path, '..', '..', '..', '..', 'misc',
-                                    'docs', 'source', 'tutorial', '*.rst')
-            tut_suite = unittest.TestSuite()
-            for file in glob.glob(tut_path):
-                filesuite = doctest.DocFileSuite(file, module_relative=False)
-                tut_suite.addTest(filesuite)
-            suites['tutorial'] = tut_suite
-        except Exception:
-            msg = "Could not add tutorial files to tests."
-            warnings.warn(msg)
-    # run test suites
-    ttr, total_time, errors = _TextTestRunner(verbosity=verbosity,
-                                              timeit=timeit).run(suites)
-    # sort tests by time taken
-    mydict = {}
-    # loop over modules
-    for mod in ttr.values():
-        mydict.update(dict(mod.timer))
-    sorted_tests = sorted(iter(mydict.items()), key=operator.itemgetter(1))
-    sorted_tests = sorted_tests[::-1]
-
-    if slowest:
-        slowest_tests = ["%0.3fs: %s" % (dt, desc)
-                         for (desc, dt) in sorted_tests[:slowest]]
-        print()
-        print("Slowest Tests")
-        print("-------------")
-        print(os.linesep.join(slowest_tests))
-        print()
-        print()
-    if interactive and not report:
-        msg = "Do you want to report this to %s? [n]: " % (server)
-        var = input(msg).lower()
-        if 'y' in var:
-            report = True
-    if report:
-        _create_report(ttr, total_time, log, server, hostname, sorted_tests,
-                       ci_url, pr_url, import_failures)
-    # make obspy-runtests exit with 1 if a test suite could not be added,
-    # indicating failure
-    if status is False:
-        errors += 1
-    if errors:
-        return errors
-
-
-def run(argv=None, interactive=True):
-    MatplotlibBackend.switch_backend("AGG", sloppy=False)
-    parser = ArgumentParser(prog='obspy-runtests',
-                            description='A command-line program that runs all '
-                                        'ObsPy tests.')
-    parser.add_argument('-V', '--version', action='version',
-                        version='%(prog)s ' + get_git_version())
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='verbose mode')
-    parser.add_argument('-q', '--quiet', action='store_true',
-                        help='quiet mode')
-    parser.add_argument('--raise-all-warnings', action='store_true',
-                        help='All warnings are raised as exceptions when this '
-                             'flag is set. Only for debugging purposes.')
-
-    # filter options
-    filter = parser.add_argument_group('Module Filter',
-                                       'Providing no modules will test all '
-                                       'ObsPy modules which do not require an '
-                                       'active network connection.')
-    filter.add_argument('-a', '--all', action='store_true',
-                        dest='test_all_modules',
-                        help='test all modules (including network modules)')
-    filter.add_argument('-x', '--exclude', action='append',
-                        help='exclude given module from test')
-    filter.add_argument('tests', nargs='*',
-                        help='test modules to run')
-
-    # timing / profile options
-    timing = parser.add_argument_group('Timing/Profile Options')
-    timing.add_argument('-t', '--timeit', action='store_true',
-                        help='shows accumulated run times of each module')
-    timing.add_argument('-s', '--slowest', default=0, type=int, dest='n',
-                        help='lists n slowest test cases')
-    timing.add_argument('-p', '--profile', action='store_true',
-                        help='uses cProfile, saves the results to file ' +
-                             'obspy.pstats and prints some profiling numbers')
-
-    # reporting options
-    report = parser.add_argument_group('Reporting Options')
-    report.add_argument('-r', '--report', action='store_true',
-                        help='automatically submit a test report')
-    report.add_argument('-d', '--dontask', action='store_true',
-                        help="don't explicitly ask for submitting a test "
-                             "report")
-    report.add_argument('-u', '--server', default='tests.obspy.org',
-                        help='report server (default is tests.obspy.org)')
-    report.add_argument('-n', '--node', dest='hostname', default=HOSTNAME,
-                        help='nodename visible at the report server')
-    report.add_argument('-l', '--log', default=None,
-                        help='append log file to test report')
-    report.add_argument('--ci-url', default=None, dest="ci_url",
-                        help='URL to Continuous Integration job page.')
-    report.add_argument('--pr-url', default=None,
-                        dest="pr_url", help='Github (Pull Request) URL.')
-
-    # other options
-    others = parser.add_argument_group('Additional Options')
-    others.add_argument('--tutorial', action='store_true',
-                        help='add doctests in tutorial')
-    others.add_argument('--no-flake8', action='store_true',
-                        help='skip code formatting test')
-    others.add_argument('--keep-images', action='store_true',
-                        help='store images created during image comparison '
-                             'tests in subfolders of baseline images')
-    others.add_argument('--keep-only-failed-images', action='store_true',
-                        help='when storing images created during testing, '
-                             'only store failed images and the corresponding '
-                             'diff images (but not images that passed the '
-                             'corresponding test).')
-
-    args = parser.parse_args(argv)
-    # set correct verbosity level
-    if args.verbose:
-        verbosity = 2
-        # raise all NumPy warnings
-        np.seterr(all='warn')
-    elif args.quiet:
-        verbosity = 0
-        # ignore user and deprecation warnings
-        warnings.simplefilter("ignore", DeprecationWarning)
-        warnings.simplefilter("ignore", UserWarning)
-        # don't ask to send a report
-        args.dontask = True
-    else:
-        verbosity = 1
-        # show all NumPy warnings
-        np.seterr(all='print')
-        # ignore user warnings
-        warnings.simplefilter("ignore", UserWarning)
-    # whether to raise any warning that's appearing
-    if args.raise_all_warnings:
-        # raise all NumPy warnings
-        np.seterr(all='raise')
-        # raise user and deprecation warnings
-        warnings.simplefilter("error", UserWarning)
-    # check for send report option or environmental settings
-    if args.report or 'OBSPY_REPORT' in os.environ.keys():
-        report = True
-    else:
-        report = False
-    if 'OBSPY_REPORT_SERVER' in os.environ.keys():
-        args.server = os.environ['OBSPY_REPORT_SERVER']
-    # check interactivity settings
-    if interactive and args.dontask:
-        interactive = False
-    if args.keep_images:
-        os.environ['OBSPY_KEEP_IMAGES'] = ""
-    if args.keep_only_failed_images:
-        os.environ['OBSPY_KEEP_ONLY_FAILED_IMAGES'] = ""
-    if args.no_flake8:
-        os.environ['OBSPY_NO_FLAKE8'] = ""
-
-    # All arguments are used by the test runner and should not interfere
-    # with any other module that might also parse them, e.g. flake8.
-    sys.argv = sys.argv[:1]
-
-    return run_tests(verbosity, args.tests, report, args.log, args.server,
-                     args.test_all_modules, args.timeit, interactive, args.n,
-                     exclude=args.exclude, tutorial=args.tutorial,
-                     hostname=args.hostname, ci_url=args.ci_url,
-                     pr_url=args.pr_url)
 
 
 def main(argv=None, interactive=True):
@@ -729,24 +610,11 @@ def main(argv=None, interactive=True):
             "ignore", 'The compiler package is deprecated and removed in '
             'Python 3.x.', DeprecationWarning)
         np.safe_eval('1')
+    breakpoint()
 
-    if '-p' in sys.argv or '--profile' in sys.argv:
-        try:
-            import cProfile as Profile
-        except ImportError:
-            import Profile
-        Profile.run('from obspy.scripts.runtests import run; run()',
-                    'obspy.pstats')
-        import pstats
-        stats = pstats.Stats('obspy.pstats')
-        print()
-        print("Profiling:")
-        stats.sort_stats('cumulative').print_stats('obspy.', 20)
-        print(PSTATS_HELP)
-    else:
-        errors = run(argv, interactive)
-        if errors:
-            sys.exit(1)
+    errors = run_tests(argv, interactive)
+    if errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -754,6 +622,7 @@ if __name__ == "__main__":
     # This script is automatically installed with name obspy-runtests by
     # setup.py to the Scripts or bin directory of your Python distribution
     # setup.py needs a function to which it's scripts can be linked.
-    errors = run(interactive=False)
+    breakpoint()
+    errors = run_tests(interactive=False)
     if errors:
         sys.exit(1)

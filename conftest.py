@@ -125,13 +125,7 @@ def pytest_runtest_makereport(item):
     outcome = yield
     result = outcome.get_result()
     if result.when == 'call':
-        # ensure there is a monkeypatched results object here
         item.session._results[result.nodeid] = result
-
-
-def pytest_html_results_summary(prefix, summary, postfix):
-    """ Called before adding the summary section to the report """
-    breakpoint()
 
 
 def pytest_sessionfinish(session, exitstatus):
