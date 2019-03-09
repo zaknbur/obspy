@@ -14,6 +14,7 @@ from future.utils import native_str
 
 import os
 import platform
+import shlex
 import sys
 import time
 import warnings
@@ -24,8 +25,10 @@ import numpy as np
 import pytest
 from lxml import etree
 
+import obspy
 from obspy.core.util.base import NamedTemporaryFile, MATPLOTLIB_VERSION
 from obspy.core.util.misc import MatplotlibBackend
+from obspy.core.util.version import get_git_version
 
 # The default url to upload test resports.
 DEFAULT_TEST_SERVER = 'tests.obspy.org'
@@ -40,6 +43,11 @@ MODULE_TEST_SKIP_CHECKS = {
     'clients.seishub':
         'obspy.clients.seishub.tests.test_client._check_server_availability'}
 
+
+try:
+    OBSPY_PATH = obspy.__path__[0]
+except (AttributeError, IndexError):
+    OBSPY_PATH = ''
 
 
 def _create_report(session):
@@ -307,8 +315,6 @@ def _send_report(session, params):
     from obspy.core.compatibility import urlparse
     import requests
 
-
-
     # get command line arg info used in the report
     server = session.config.getoption('--server')
 
@@ -380,7 +386,7 @@ def _configure_parser():
     report.add_argument('-d', '--dontask', action='store_true',
                         help="don't explicitly ask for submitting a test "
                              "report")
-    report.add_argument('-u', '--server', default='tests.obspy.org',
+    report.add_argument('-u', '--server', default=DEFAULT_TEST_SERVER,
                         help='report server (default is tests.obspy.org)')
     report.add_argument('-n', '--node', dest='hostname', default=hostname,
                         help='nodename visible at the report server')
@@ -408,79 +414,91 @@ def _configure_parser():
     return parser
 
 
-def _obspy_to_pytest_nodeid(obspy_path):
+def _obspy_to_pytest_nodeid(obspy_str):
     """
     Convert an obspy test node id to a pytest nodeid.
 
     Eg; io.mseed -> obspy/io/mseed/tests
     """
-    return obspy_path
+    # get base path
+    path = []
+    # iterate each node in obspy_str, try to determine where file ends
+    # and test cases start
+    for node in obspy_str.split('.'):
+        # if the current node is a directory append to path
+        if os.path.isdir(os.path.join(*(path + [node]))):
+            path.append(node)
+        # if the current node is a python file
+        elif os.path.exists(os.path.join(*(path + [node + '.py']))):
+            path.append(node + '.py')
+        # else it may be a test case, add :: and append to path
+        else:
+            path[-1] = path[-1] + '::' + node
+    return os.path.join(*path)
 
-def _convert_to_pytest_str(args):
+
+def _convert_to_pytest_input(args, input_args=None):
     """
     Translate the parsed obspy-runtest arguments into pytest input.
     """
     out = []  # init a list for storing output
-    breakpoint()
 
+    # if version is specified just bring obspy version and exit
+    if getattr(args, 'version', None):
+        print(get_git_version())
+        sys.exit(0)
+    # handle setting verbosity and warning filters
     if args.verbose:
         out.append(['--verbose %d' % args.verbose])
-    if args.quiet:
+    elif args.quiet:
         out.append('--quiet')
         # TODO test if this actually suppresses warnings in pytest runner
         warnings.simplefilter("ignore", DeprecationWarning)
         warnings.simplefilter("ignore", UserWarning)
-    else:
-        verbosity = 1
+    else:  # Leave
         # show all NumPy warnings
         np.seterr(all='print')
         # ignore user warnings
         warnings.simplefilter("ignore", UserWarning)
-    if args.raise_all_warnings:
+    # handle filtering options
+    if args.raise_all_warnings:  # raise all warnings as errors
+        np.seterr(all='raise')
         out.append('--Werror')
     if args.test_all_modules:
         out.append('--all')
-    for exclude in args.exclude or None:
+    for exclude in args.exclude or []:
         out.append('--exclude %s' % _obspy_to_pytest_nodeid(exclude))
 
+    # handle timing options
+    # TODO figure out timeit and profile
+    if getattr(args, 'slowest', None) is not None:
+        out.append('--durations %d' % args.slowest)
 
-    #
-    # elif args.quiet:
-    #     verbosity = 0
-    #     # ignore user and deprecation warnings
-    #     warnings.simplefilter("ignore", DeprecationWarning)
-    #     warnings.simplefilter("ignore", UserWarning)
-    #     # don't ask to send a report
-    #     args.dontask = True
-    # else:
-
-    # whether to raise any warning that's appearing
-    if args.raise_all_warnings:
-        # raise all NumPy warnings
-        np.seterr(all='raise')
-        # raise user and deprecation warnings
-        warnings.simplefilter("error", UserWarning)
-    # check for send report option or environmental settings
+    # handle reporting options
     if args.report or 'OBSPY_REPORT' in os.environ.keys():
-        report = True
-    else:
-        report = False
-    if 'OBSPY_REPORT_SERVER' in os.environ.keys():
-        args.server = os.environ['OBSPY_REPORT_SERVER']
-    if args.keep_images:
-        os.environ['OBSPY_KEEP_IMAGES'] = ""
-    if args.keep_only_failed_images:
-        os.environ['OBSPY_KEEP_ONLY_FAILED_IMAGES'] = ""
-    if args.no_flake8:
-        os.environ['OBSPY_NO_FLAKE8'] = ""
+        out.append('--report')
+    if args.server or 'OBSPY_REPORT_SERVER' in os.environ.keys():
+        server = os.environ.get('OBSPY_REPORT_SERVER') or args.server
+        if server != DEFAULT_TEST_SERVER:
+            out.append('--server %s' % server)
+    if getattr(args, 'node', None):
+        out.append('--node %s' % args.node)
+    if getattr(args, 'log', None):
+        out.append('--log')
+    if getattr(args, 'ci_url', None):
+        out.append('--ci-url %s' % args.ci_url)
+    if getattr(args, 'pr_url', None):
+        out.append('--pr-url %s' % args.pr_url)
 
+    # TODO figure out what to do with these
+    # if args.keep_images:
+    #     os.environ['OBSPY_KEEP_IMAGES'] = ""
+    # if args.keep_only_failed_images:
+    #     os.environ['OBSPY_KEEP_ONLY_FAILED_IMAGES'] = ""
+    # if args.no_flake8:
+    #     os.environ['OBSPY_NO_FLAKE8'] = ""
 
-
-    # All arguments are used by the test runner and should not interfere
-    # with any other module that might also parse them, e.g. flake8.
-    sys.argv = sys.argv[:1]
-    breakpoint()
-
+    return out
 
 
 def run_tests(argv=None, interactive=True):
@@ -488,10 +506,17 @@ def run_tests(argv=None, interactive=True):
     Run the obspy test suite with pytest. Return pytest's exit code.
     """
     MatplotlibBackend.switch_backend("AGG", sloppy=False)
+    # get input and make sure it is split
+    input_args = sys.argv[1:] if argv is None else shlex.split(argv)
+    # All arguments are used by the test runner and should not interfere
+    # with any other module that might also parse them, e.g. flake8.
+    if sys.argv:
+        sys.argv = sys.argv[:1]
     # configure parser and parse input
     parser = _configure_parser()
-    args = parser.parse_args(argv)  # Note: if argv is None sys.argv is parsed
-    pytest_input = _convert_to_pytest_str(args)
+    args = parser.parse_args(input_args)
+    # convert input to a pytest-able string
+    pytest_input = _convert_to_pytest_input(args, input_args)
     # run pytest!
     return pytest.main(pytest_input)
 
