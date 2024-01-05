@@ -1,7 +1,8 @@
 repo_name: zaknbur/obspy
 report_id: 202b168f61105c9cd3cfd7890f62605e
+version: 0.1
 repo_type: Public
-timestamp: '2023-11-23T15:33:33+00:00'
+timestamp: '2024-01-05T08:35:13+00:00'
 requested_by: megies
 provider: github
 branch: master
@@ -15,6 +16,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/no-img-open-source.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: CSS 3
   description: The latest evolution of the Cascading Style Sheets language
@@ -24,6 +26,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/6727/css.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Fortran
   description: High-performance parallel programming language
@@ -33,6 +36,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/11029/default_075c8240ce6c7ac3a8db41abef5c68eb84207f99.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Python
   description: A clear and powerful object-oriented programming language, comparable
@@ -43,6 +47,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/993/pUBY5pVj.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: MongoDB
   description: The database for giant ideas
@@ -52,7 +57,8 @@ tools:
   category: Data Stores
   sub_category: Databases
   image_url: https://img.stackshare.io/service/1030/leaf-360x360.png
-  detection_source: obspy/core/stream.py
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/obspy/clients/seishub/client.py
+  detection_source: obspy/clients/seishub/client.py
   last_updated_by: Elliott Sales de Andrade
   last_updated_on: 2016-01-31 07:53:52.000000000 Z
 - name: CircleCI
@@ -63,6 +69,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Continuous Integration
   image_url: https://img.stackshare.io/service/190/CvqrSSFs_400x400.jpg
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/.circleci/config.yml
   detection_source: ".circleci/config.yml"
   last_updated_by: Damian Kula
   last_updated_on: 2018-10-29 14:46:57.000000000 Z
@@ -74,6 +81,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Code Coverage
   image_url: https://img.stackshare.io/service/2673/Codecov_Mark_Circle_Pink.png
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/codecov.yml
   detection_source: codecov.yml
   last_updated_by: Tobias Megies
   last_updated_on: 2016-07-13 12:39:53.000000000 Z
@@ -86,6 +94,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Virtual Machine Platforms & Containers
   image_url: https://img.stackshare.io/service/586/n4u37v9t_400x400.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Git
   description: Fast, scalable, distributed revision control system
@@ -95,6 +104,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Version Control System
   image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Travis CI
   description: A hosted continuous integration service for open source and private
@@ -105,6 +115,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Continuous Integration
   image_url: https://img.stackshare.io/service/460/Lu6cGu0z_400x400.png
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/.travis.yml
   detection_source: ".travis.yml"
   last_updated_by: Tobias Megies
   last_updated_on: 2017-09-19 09:08:24.000000000 Z
@@ -116,7 +127,8 @@ tools:
   category: Languages & Frameworks
   sub_category: Operating Systems
   image_url: https://img.stackshare.io/service/1656/vd4gAekh.png
-  detection_source: misc/docker/base_images/debian_9_stretch_armhf/Dockerfile
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/misc/docker/base_images/debian_8_jessie/Dockerfile
+  detection_source: misc/docker/base_images/debian_8_jessie/Dockerfile
   last_updated_by: Lion Krischer
   last_updated_on: 2014-06-20 17:51:41.000000000 Z
 - name: Fedora
@@ -128,7 +140,8 @@ tools:
   category: Languages & Frameworks
   sub_category: Operating Systems
   image_url: https://img.stackshare.io/service/5068/infinity-logo.png
-  detection_source: misc/docker/base_images/fedora_26/Dockerfile
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/misc/docker/base_images/fedora_25/Dockerfile
+  detection_source: misc/docker/base_images/fedora_25/Dockerfile
   last_updated_by: Tobias Megies
   last_updated_on: 2017-03-29 15:00:09.000000000 Z
 - name: HTML
@@ -137,6 +150,7 @@ tools:
   open_source: false
   hosted_saas: false
   image_url: https://img.stackshare.io/service/2270/no-img-open-source.png
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/misc/docs/source/_templates/build_status.html
   detection_source: misc/docs/source/_templates/build_status.html
   last_updated_by: Tobias Megies
   last_updated_on: 2017-10-06 15:30:47.000000000 Z
@@ -148,6 +162,7 @@ tools:
   open_source: false
   hosted_saas: false
   image_url: https://img.stackshare.io/service/10735/hB7JEnDh_normal.jpg
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Shell
   description: A shell is a text-based terminal, used for manipulating programs and
@@ -158,6 +173,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/4631/default_c2062d40130562bdc836c13dbca02d318205a962.png
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
 - name: Ubuntu
   description: The leading OS for PC, tablet, phone and cloud
@@ -167,7 +183,8 @@ tools:
   category: Languages & Frameworks
   sub_category: Operating Systems
   image_url: https://img.stackshare.io/service/3511/cof_orange_hex.jpg
-  detection_source: misc/docker/base_images/ubuntu_18_10_cosmic/Dockerfile
+  detection_source_url: https://github.com/zaknbur/obspy/blob/master/misc/docker/base_images/ubuntu_14_04_trusty/Dockerfile
+  detection_source: misc/docker/base_images/ubuntu_14_04_trusty/Dockerfile
   last_updated_by: Lion Krischer
   last_updated_on: 2014-11-21 13:52:08.000000000 Z
 - name: XSLT
@@ -177,4 +194,5 @@ tools:
   open_source: false
   hosted_saas: false
   image_url: https://img.stackshare.io/service/4253/nZXfdUQq_normal.jpg
+  detection_source_url: https://github.com/zaknbur/obspy
   detection_source: Repo Metadata
